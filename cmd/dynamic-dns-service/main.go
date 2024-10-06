@@ -30,10 +30,10 @@ func main() {
 		log.Fatal(err)
 	}
 	if err := updateDNSRecord(ctx, cfdns, "A", *domainName); err != nil {
-		log.Fatal(err)
+		log.Printf("Error updating A record: %s\n", err)
 	}
 	if err := updateDNSRecord(ctx, cfdns, "AAAA", *domainName); err != nil {
-		log.Fatal(err)
+		log.Printf("Error updating AAAA record: %s\n", err)
 	}
 }
 
