@@ -1,0 +1,11 @@
+- name: Get path of project root
+  set_fact:
+    project_root: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}"
+
+- name: Build binary
+  shell:
+    chdir: "{{ project_root }}"
+    cmd: make -k clean build
+  environment:
+    GOOS: linux
+    GOARCH: "{{ target_arch }}"

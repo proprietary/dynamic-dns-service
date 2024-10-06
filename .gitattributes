@@ -1,0 +1,2 @@
+deployments/playbooks/vars/main.yaml filter=git-crypt diff=git-crypt
+deployments/playbooks/inventory.ini filter=git-crypt diff=git-crypt

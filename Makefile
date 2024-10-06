@@ -1,15 +1,16 @@
 BIN = dynamic-dns-service
 SOURCES = $(shell find . -name '*.go')
 
-all: test $(BIN)
+all: $(BIN)
+
+build: $(BIN)
 
 $(BIN): $(SOURCES)
-	cd cmd/$(BIN) && \
-	go build -o $(BIN) .
+	go build -o bin/$(BIN) ./...
 
 .PHONY: clean
 clean:
-	rm -f $(BIN)
+	rm -f bin/$(BIN)
 
 .PHONY: test
 test: $(SOURCES)
@@ -18,3 +19,7 @@ test: $(SOURCES)
 .PHONY: run
 run: $(BIN)
 	./$(BIN)
+
+.PHONY: deploy
+deploy: $(BIN)
+	ansible-playbook -i deployments/playbooks/inventory.ini deployments/playbooks/main.yaml

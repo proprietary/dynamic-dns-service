@@ -1,0 +1,11 @@
+[Unit]
+Description=Update Cloudflare DNS records periodically to reflect current host's dynamic IP
+After=network-online.target
+
+[Timer]
+OnBootSec={{ interval }}
+OnUnitActiveSec={{ interval }}
+Unit=dynamic-dns-service.service
+
+[Install]
+WantedBy=timers.target

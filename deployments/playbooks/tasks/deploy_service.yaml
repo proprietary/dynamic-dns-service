@@ -1,0 +1,76 @@
+- name: Get path of project root
+  delegate_to: localhost
+  connection: local
+  set_fact:
+    project_root: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}"
+
+- name: Create group for service
+  group:
+    name: "{{ service_name }}"
+    state: present
+
+- name: Create user for service
+  user:
+    name: "{{ service_name }}"
+    group: "{{ service_name }}"
+    state: present
+    shell: /bin/false
+
+- name: Print install path
+  debug:
+    var: install_path
+
+- name: Ensure install directories exist
+  file:
+    path: "{{ install_path }}/{{ item }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ service_name }}"
+    group: "{{ service_name }}"
+    recurse: true
+  with_items:
+  - bin
+  - etc
+
+- name: Copy binary to install path
+  copy:
+    src: "{{ project_root }}/bin/{{ service_name }}"
+    dest: "{{ install_path }}/bin/{{ service_name }}"
+    mode: '0755'
+    owner: "{{ service_name }}"
+    group: "{{ service_name }}"
+
+- name: Create EnvironmentFile
+  template:
+    src: env.j2
+    dest: "{{ install_path }}/etc/{{ service_name }}.env"
+    owner: "{{ service_name }}"
+    group: "{{ service_name }}"
+    mode: '0600'
+
+- name: Deploy systemd service file
+  template:
+    src: "{{ service_name }}.service.j2"
+    dest: "/etc/systemd/system/{{ service_name }}.service"
+    mode: '0644'
+    owner: root
+    group: root
+  notify: Reload systemd
+
+- name: Deploy systemd timer file
+  template:
+    src: "{{ service_name }}.timer.j2"
+    dest: "/etc/systemd/system/{{ service_name }}.timer"
+    mode: '0644'
+    owner: root
+    group: root
+  notify: Reload systemd
+
+- name: Ensure service is enabled and started
+  systemd:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+  with_items:
+  - "{{ service_name }}.service"
+  - "{{ service_name }}.timer"
